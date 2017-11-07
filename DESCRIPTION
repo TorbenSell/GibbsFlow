@@ -6,7 +6,8 @@ Date: 2017-10-04
 Author: Jeremy Heng
 Maintainer: Jeremy Heng <jeremyhengjm@gmail.com>
 Description: This package implements sequential Monte Carlo samplers that use Gibbs flow transport. 
-URL: https://arxiv.org/abs/1509.08787   
+URL: https://github.com/jeremyhengjm/GibbsFlow
+BugReports: https://github.com/jeremyhengjm/GibbsFlow/issues
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
