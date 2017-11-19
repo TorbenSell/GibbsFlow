@@ -1,5 +1,5 @@
-#' @rdname run_smc 
-#' @title Run sequential Monte Carlo sampler
+#' @rdname run_ais 
+#' @title Run annealed importance sampler
 #' @param prior list with keys: 
 #' \code{logdensity} evaluates log prior density, 
 #' \code{gradlogdensity} returns its gradient, 
@@ -19,9 +19,9 @@
 #' \code{ess} effective sample size, 
 #' \code{log_normconst} log normalizing constant, 
 #' \code{acceptprob} MCMC acceptance probabilities 
-#' @seealso \code{\link{run_ais}} if no resampling is desired
+#' @seealso \code{\link{run_smc}} if resampling is desired
 #' @export
-run_smc <- function(prior, likelihood, nparticles, lambda, mcmc){
+run_ais <- function(prior, likelihood, nparticles, lambda, mcmc){
   # initialization
   xparticles <- prior$rinit(nparticles)
   
@@ -30,17 +30,17 @@ run_smc <- function(prior, likelihood, nparticles, lambda, mcmc){
   nsteps <- length(lambda)
   xtrajectory <- array(dim = c(nparticles, dimension, nsteps))
   xtrajectory[ , , 1] <- xparticles
+  logweights <- rep(0, nparticles)
   ess <- rep(0, nsteps)
   ess[1] <- nparticles
   log_normconst <- rep(0, nsteps)
-  log_ratio_normconst <- 0
   acceptprob <- matrix(nrow = 2, ncol = nsteps)
   acceptprob[ , 1] <- c(1, 1)
   
   for (istep in 2:nsteps){
     # weight 
     current_loglikelihood <- likelihood$logdensity(xparticles)
-    logweights <- (lambda[istep] - lambda[istep - 1]) * current_loglikelihood
+    logweights <- logweights + (lambda[istep] - lambda[istep - 1]) * current_loglikelihood
     maxlogweights <- max(logweights)
     weights <- exp(logweights - maxlogweights)
     normweights <- weights / sum(weights)
@@ -49,14 +49,8 @@ run_smc <- function(prior, likelihood, nparticles, lambda, mcmc){
     ess[istep] <- 1 / sum(normweights^2)
     
     # compute normalizing constant
-    log_ratio_normconst <- log_ratio_normconst + log(mean(weights)) + maxlogweights  
-    log_normconst[istep] <- log_ratio_normconst
+    log_normconst[istep] <- log(mean(weights)) + maxlogweights
     
-    # resample
-    ancestors <- systematic_resampling(normweights, nparticles, runif(1) / nparticles)
-    xparticles <- xparticles[ancestors, ]
-    current_loglikelihood <- current_loglikelihood[ancestors]
-
     # MCMC
     current_logtarget <- function(x) prior$logdensity(x) + lambda[istep] * likelihood$logdensity(x)
     current_gradlogtarget <- function(x) prior$gradlogdensity(x) + lambda[istep] * likelihood$gradlogdensity(x)

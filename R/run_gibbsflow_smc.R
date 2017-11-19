@@ -1,5 +1,5 @@
-#' @rdname run_smc 
-#' @title Run sequential Monte Carlo sampler
+#' @rdname run_gibbsflow_smc
+#' @title Run Gibbs flow sequential Monte Carlo sampler
 #' @param prior list with keys: 
 #' \code{logdensity} evaluates log prior density, 
 #' \code{gradlogdensity} returns its gradient, 
@@ -9,6 +9,7 @@
 #' \code{gradlogdensity} returns its gradient
 #' @param nparticles number of particles
 #' @param lambda vector describing tempering schedule
+#' @param timegrid vector describing numerical integration times 
 #' @param mcmc list with keys: 
 #' \code{choice} specifies type of MCMC method, 
 #' \code{parameters} specifies algorithmic tuning parameters,
@@ -17,19 +18,22 @@
 #' \code{xtrajectory} trajectories, 
 #' \code{xparticles} particles at terminal time,
 #' \code{ess} effective sample size, 
-#' \code{log_normconst} log normalizing constant, 
+#' \code{log_normconst} log normalizing constant,
 #' \code{acceptprob} MCMC acceptance probabilities 
-#' @seealso \code{\link{run_ais}} if no resampling is desired
+#' @seealso \code{\link{run_gibbsflow_ais}} if no resampling is desired
 #' @export
-run_smc <- function(prior, likelihood, nparticles, lambda, mcmc){
+run_gibbsflow_smc <- function(prior, likelihood, nparticles, lambda, timegrid, mcmc){
   # initialization
   xparticles <- prior$rinit(nparticles)
+  previous_logdensity <- prior$logdensity(xparticles)
   
   # pre-allocate
   dimension <- ncol(xparticles)
-  nsteps <- length(lambda)
+  nsteps <- length(lambda) # same length as timegrid
+  stepsize <- diff(timegrid) 
   xtrajectory <- array(dim = c(nparticles, dimension, nsteps))
   xtrajectory[ , , 1] <- xparticles
+  logweights <- rep(0, nparticles)
   ess <- rep(0, nsteps)
   ess[1] <- nparticles
   log_normconst <- rep(0, nsteps)
@@ -38,12 +42,17 @@ run_smc <- function(prior, likelihood, nparticles, lambda, mcmc){
   acceptprob[ , 1] <- c(1, 1)
   
   for (istep in 2:nsteps){
+    # gibbs flow move
+    output_flow <- compute_gibbsflow(stepsize[istep-1], timegrid[istep-1], xparticles, previous_logdensity)
+    xparticles <- output_flow$xparticles 
+    jacobian_det <- output_flow$jacobian_det 
+    
     # weight 
-    current_loglikelihood <- likelihood$logdensity(xparticles)
-    logweights <- (lambda[istep] - lambda[istep - 1]) * current_loglikelihood
+    current_logdensity <- prior$logdensity(xparticles) + lambda[istep] * likelihood$logdensity(xparticles)
+    logweights <- current_logdensity - previous_logdensity + log(abs(jacobian_det))
     maxlogweights <- max(logweights)
     weights <- exp(logweights - maxlogweights)
-    normweights <- weights / sum(weights)
+    normweights <- weights / sum(weights)  
     
     # compute effective sample size
     ess[istep] <- 1 / sum(normweights^2)
@@ -55,14 +64,13 @@ run_smc <- function(prior, likelihood, nparticles, lambda, mcmc){
     # resample
     ancestors <- systematic_resampling(normweights, nparticles, runif(1) / nparticles)
     xparticles <- xparticles[ancestors, ]
-    current_loglikelihood <- current_loglikelihood[ancestors]
+    current_logdensity <- current_logdensity[ancestors]
 
     # MCMC
     current_logtarget <- function(x) prior$logdensity(x) + lambda[istep] * likelihood$logdensity(x)
     current_gradlogtarget <- function(x) prior$gradlogdensity(x) + lambda[istep] * likelihood$gradlogdensity(x)
     transition_kernel <- construct_kernel(current_logtarget, current_gradlogtarget, mcmc)
     
-    current_logdensity <- prior$logdensity(xparticles) + lambda[istep] * current_loglikelihood
     current_acceptprob <- rep(0, mcmc$nmoves)
     for (imove in 1:mcmc$nmoves){
       mcmc_output <- transition_kernel(xparticles, current_logdensity)
@@ -71,7 +79,10 @@ run_smc <- function(prior, likelihood, nparticles, lambda, mcmc){
       current_acceptprob[imove] <- mcmc_output$acceptprob
     }
     acceptprob[ , istep] <- c(min(current_acceptprob), max(current_acceptprob))
+    
+    # store trajectory
     xtrajectory[ , , istep] <- xparticles
+    previous_logdensity <- current_logdensity
     
   }
   
