@@ -8,8 +8,10 @@
 #' \code{logdensity} samples from proposal, 
 #' \code{gradlogdensity} returns its gradient
 #' @param nparticles number of particles
-#' @param lambda vector describing tempering schedule
 #' @param timegrid vector describing numerical integration times 
+#' @param lambda vector describing tempering schedule
+#' @param derivative_lambda time derivative of tempering schedule
+#' @param compute_gibbsflow function computing Gibbs flow
 #' @return list with keys: 
 #' \code{xtrajectory} trajectories, 
 #' \code{xparticles} particles at terminal time,
@@ -17,7 +19,7 @@
 #' \code{log_normconst} log normalizing constant, 
 #' @seealso \code{\link{run_gibbsflow_smc}} if resampling is desired
 #' @export
-run_gibbsflow_sis <- function(prior, likelihood, nparticles, lambda, timegrid, compute_gibbsflow){
+run_gibbsflow_sis <- function(prior, likelihood, nparticles, timegrid, lambda, derivative_lambda, compute_gibbsflow){
   # initialization
   xparticles <- prior$rinit(nparticles)
   previous_logdensity <- prior$logdensity(xparticles)
@@ -35,13 +37,14 @@ run_gibbsflow_sis <- function(prior, likelihood, nparticles, lambda, timegrid, c
   
   for (istep in 2:nsteps){
     # gibbs flow move
-    output_flow <- compute_gibbsflow(stepsize[istep-1], timegrid[istep-1], xparticles, previous_logdensity)
+    output_flow <- compute_gibbsflow(stepsize[istep-1], lambda[istep-1], derivative_lambda[istep-1], 
+                                     xparticles, previous_logdensity)
     xparticles <- output_flow$xparticles 
-    jacobian_det <- output_flow$jacobian_det 
+    log_jacobian_dets <- as.numeric(output_flow$log_jacobian_dets)
 
     # weight 
     current_logdensity <- prior$logdensity(xparticles) + lambda[istep] * likelihood$logdensity(xparticles)
-    logweights <- logweights + current_logdensity - previous_logdensity + log(abs(jacobian_det))
+    logweights <- logweights + current_logdensity - previous_logdensity + log_jacobian_dets
     maxlogweights <- max(logweights)
     weights <- exp(logweights - maxlogweights)
     normweights <- weights / sum(weights)  

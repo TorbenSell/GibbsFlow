@@ -3,9 +3,23 @@ library(GibbsFlow)
 library(tictoc)
 library(ggplot2)
 
-# model
-dimension <- 2
-model <- gaussian_model(dimension)
+# prior
+prior <- list()
+prior$logdensity <- function(x) as.numeric(gaussian_logprior(x))
+prior$gradlogdensity <- function(x) gaussian_gradlogprior(x)
+prior$rinit <- function(n) gaussian_sampleprior(n) 
+
+# likelihood
+likelihood <- list()
+likelihood$logdensity <- function(x) as.numeric(gaussian_loglikelihood(x))
+likelihood$gradlogdensity <- function(x) gaussian_gradloglikelihood(x)
+
+# posterior
+posterior <- list()
+posterior$mean <- function(lambda) gaussian_posterior_mean(lambda)
+posterior$cov <- function(lambda) gaussian_posterior_cov(lambda)
+posterior$log_normconst <- function(lambda) gaussian_log_normconst(lambda)
+posterior$logdensity <- function(x, lambda) gaussian_logposterior(x, lambda)
 
 # SMC settings
 nparticles <- 2^10
@@ -14,12 +28,12 @@ lambda <- seq(0, 1, length.out = nsteps)
 mcmc <- list()
 mcmc$choice <- "hmc"
 mcmc$parameters$stepsize <- 0.1
-mcmc$parameters$nsteps <- 20
+mcmc$parameters$nsteps <- 40
 mcmc$nmoves <- 5
 
 # run SMC
 tic("SMC runtime")
-  smc <- run_ais(model$prior, model$likelihood, nparticles, lambda, mcmc)
+  smc <- run_ais(prior, likelihood, nparticles, lambda, mcmc)
 toc()
 
 # ess plot
@@ -29,7 +43,7 @@ ggplot(ess.df, aes(x = time, y = ess)) + geom_line() +
 
 # normalizing constant plot
 normconst.df <- data.frame(time = 1:nsteps, normconst = smc$log_normconst)
-true_normconst.df <- data.frame(time = 1:nsteps, normconst = sapply(lambda, model$posterior$log_normconst))
+true_normconst.df <- data.frame(time = 1:nsteps, normconst = sapply(lambda, posterior$log_normconst))
 ggplot() + geom_line(data = normconst.df, aes(x = time, y = normconst), colour = "blue") + 
   geom_line(data = true_normconst.df, aes(x = time, y = normconst), colour = "red") +
     labs(x = "time", y = "log normalizing constant")
@@ -47,8 +61,8 @@ grid <- expand.grid(xgrid = xgrid, ygrid = ygrid)
 prior_values <- rep(0, nrow(grid))
 posterior_values <- rep(0, nrow(grid))
 for (igrid in 1:nrow(grid)){
-  prior_values[igrid] <- exp(model$prior$logdensity(as.matrix(grid[igrid, ], nrow = 1)))
-  posterior_values[igrid] <- exp(model$posterior$logdensity(as.matrix(grid[igrid, ], nrow = 1), 1))
+  prior_values[igrid] <- exp(prior$logdensity(as.matrix(grid[igrid, ], nrow = 1)))
+  posterior_values[igrid] <- exp(posterior$logdensity(as.matrix(grid[igrid, ], nrow = 1), 1))
 }
 plot_prior <- cbind(grid, prior_values)
 plot_posterior <- cbind(grid, posterior_values)

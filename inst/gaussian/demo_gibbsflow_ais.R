@@ -24,16 +24,23 @@ posterior$logdensity <- function(x, lambda) gaussian_logposterior(x, lambda)
 
 # smc settings
 nparticles <- 2^10
-nsteps <- 20
+nsteps <- 40
 timegrid <- seq(0, 1, length.out = nsteps)
 exponent <- 1
 lambda <- timegrid^exponent
 derivative_lambda <- exponent * timegrid^(exponent - 1)
 
+# mcmc settings
+mcmc <- list()
+mcmc$choice <- "hmc"
+mcmc$parameters$stepsize <- 0.1
+mcmc$parameters$nsteps <- 20
+mcmc$nmoves <- 5
+
 # run sampler
-set.seed(7)
+# set.seed(17)
 tic()
-  smc <- run_gibbsflow_sis(prior, likelihood, nparticles, timegrid, lambda, derivative_lambda, compute_gibbsflow)
+smc <- run_gibbsflow_ais(prior, likelihood, nparticles, timegrid, lambda, derivative_lambda, compute_gibbsflow, mcmc)
 toc()
 
 # ess plot
@@ -47,6 +54,12 @@ true_normconst.df <- data.frame(time = 1:nsteps, normconst = sapply(lambda, post
 ggplot() + geom_line(data = normconst.df, aes(x = time, y = normconst), colour = "blue") + 
   geom_line(data = true_normconst.df, aes(x = time, y = normconst), colour = "red") +
   labs(x = "time", y = "log normalizing constant")
+
+# acceptance probability
+acceptprob_min.df <- data.frame(time = 1:nsteps, acceptprob = smc$acceptprob[1, ])
+acceptprob_max.df <- data.frame(time = 1:nsteps, acceptprob = smc$acceptprob[2, ])
+ggplot() + geom_line(data = acceptprob_min.df, aes(x = time, y = acceptprob), colour = "blue") + 
+  geom_line(data = acceptprob_max.df, aes(x = time, y = acceptprob), colour = "red") + ylim(c(0, 1))
 
 # plot density function and trajectory
 xgrid <- seq(-3, 7, length.out = 200)
@@ -64,5 +77,4 @@ plot_particles <- data.frame(x = smc$xparticles[, 1], y = smc$xparticles[, 2])
 ggplot() + stat_contour(data = plot_prior, aes(x = xgrid, y = ygrid, z = prior_values), colour = "red") +
   stat_contour(data = plot_posterior, aes(x = xgrid, y = ygrid, z = posterior_values)) +
   geom_point(data = plot_particles, aes(x = x, y = y), colour = "black")
-
 

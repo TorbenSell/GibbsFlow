@@ -6,6 +6,145 @@
 
 using namespace Rcpp;
 
+// gaussian_logprior
+arma::vec gaussian_logprior(arma::mat x);
+RcppExport SEXP _GibbsFlow_gaussian_logprior(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_logprior(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_gradlogprior
+arma::mat gaussian_gradlogprior(arma::mat x);
+RcppExport SEXP _GibbsFlow_gaussian_gradlogprior(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_gradlogprior(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_partialderivative_logprior
+double gaussian_partialderivative_logprior(int dim, arma::rowvec x);
+RcppExport SEXP _GibbsFlow_gaussian_partialderivative_logprior(SEXP dimSEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_partialderivative_logprior(dim, x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_sampleprior
+arma::mat gaussian_sampleprior(int n);
+RcppExport SEXP _GibbsFlow_gaussian_sampleprior(SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_sampleprior(n));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_loglikelihood
+arma::vec gaussian_loglikelihood(arma::mat x);
+RcppExport SEXP _GibbsFlow_gaussian_loglikelihood(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_loglikelihood(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_gradloglikelihood
+arma::mat gaussian_gradloglikelihood(arma::mat x);
+RcppExport SEXP _GibbsFlow_gaussian_gradloglikelihood(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_gradloglikelihood(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_partialderivative_loglikelihood
+double gaussian_partialderivative_loglikelihood(int dim, arma::rowvec x);
+RcppExport SEXP _GibbsFlow_gaussian_partialderivative_loglikelihood(SEXP dimSEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_partialderivative_loglikelihood(dim, x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_posterior_cov
+arma::mat gaussian_posterior_cov(double lambda);
+RcppExport SEXP _GibbsFlow_gaussian_posterior_cov(SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_posterior_cov(lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_posterior_mean
+arma::rowvec gaussian_posterior_mean(double lambda);
+RcppExport SEXP _GibbsFlow_gaussian_posterior_mean(SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_posterior_mean(lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_log_normconst
+double gaussian_log_normconst(double lambda);
+RcppExport SEXP _GibbsFlow_gaussian_log_normconst(SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_log_normconst(lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_logposterior
+arma::vec gaussian_logposterior(arma::mat x, double lambda);
+RcppExport SEXP _GibbsFlow_gaussian_logposterior(SEXP xSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_logposterior(x, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_gibbsflow
+Rcpp::List gaussian_gibbsflow(double stepsize, double lambda, double derivative_lambda, arma::mat xparticles, arma::vec logdensity);
+RcppExport SEXP _GibbsFlow_gaussian_gibbsflow(SEXP stepsizeSEXP, SEXP lambdaSEXP, SEXP derivative_lambdaSEXP, SEXP xparticlesSEXP, SEXP logdensitySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type stepsize(stepsizeSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type derivative_lambda(derivative_lambdaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type xparticles(xparticlesSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type logdensity(logdensitySEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_gibbsflow(stepsize, lambda, derivative_lambda, xparticles, logdensity));
+    return rcpp_result_gen;
+END_RCPP
+}
 // mvnpdf
 arma::vec mvnpdf(arma::mat x, arma::rowvec mu, arma::mat sigma);
 RcppExport SEXP _GibbsFlow_mvnpdf(SEXP xSEXP, SEXP muSEXP, SEXP sigmaSEXP) {
@@ -61,6 +200,18 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_GibbsFlow_gaussian_logprior", (DL_FUNC) &_GibbsFlow_gaussian_logprior, 1},
+    {"_GibbsFlow_gaussian_gradlogprior", (DL_FUNC) &_GibbsFlow_gaussian_gradlogprior, 1},
+    {"_GibbsFlow_gaussian_partialderivative_logprior", (DL_FUNC) &_GibbsFlow_gaussian_partialderivative_logprior, 2},
+    {"_GibbsFlow_gaussian_sampleprior", (DL_FUNC) &_GibbsFlow_gaussian_sampleprior, 1},
+    {"_GibbsFlow_gaussian_loglikelihood", (DL_FUNC) &_GibbsFlow_gaussian_loglikelihood, 1},
+    {"_GibbsFlow_gaussian_gradloglikelihood", (DL_FUNC) &_GibbsFlow_gaussian_gradloglikelihood, 1},
+    {"_GibbsFlow_gaussian_partialderivative_loglikelihood", (DL_FUNC) &_GibbsFlow_gaussian_partialderivative_loglikelihood, 2},
+    {"_GibbsFlow_gaussian_posterior_cov", (DL_FUNC) &_GibbsFlow_gaussian_posterior_cov, 1},
+    {"_GibbsFlow_gaussian_posterior_mean", (DL_FUNC) &_GibbsFlow_gaussian_posterior_mean, 1},
+    {"_GibbsFlow_gaussian_log_normconst", (DL_FUNC) &_GibbsFlow_gaussian_log_normconst, 1},
+    {"_GibbsFlow_gaussian_logposterior", (DL_FUNC) &_GibbsFlow_gaussian_logposterior, 2},
+    {"_GibbsFlow_gaussian_gibbsflow", (DL_FUNC) &_GibbsFlow_gaussian_gibbsflow, 5},
     {"_GibbsFlow_mvnpdf", (DL_FUNC) &_GibbsFlow_mvnpdf, 3},
     {"_GibbsFlow_mvnpdf_chol", (DL_FUNC) &_GibbsFlow_mvnpdf_chol, 4},
     {"_GibbsFlow_mvnrnd", (DL_FUNC) &_GibbsFlow_mvnrnd, 3},

@@ -17,7 +17,7 @@ gaussian_model <- function(dimension){
   
   # construct Gaussian log-likelihood
   like_obs <- rep(14.25, dimension)
-  like_rho <- 0.85
+  like_rho <- 0.5
   like_cov <- like_rho * matrix(1, dimension, dimension) + diag(1 - like_rho, dimension)
   like_rooti <- t(solve(chol(like_cov)))
   like_rootisum <- sum(log(diag(like_rooti)))

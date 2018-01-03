@@ -4,8 +4,8 @@
 \alias{run_gibbsflow_sis}
 \title{Run Gibbs flow sequential importance sampler}
 \usage{
-run_gibbsflow_sis(prior, likelihood, nparticles, lambda, timegrid,
-  compute_gibbsflow)
+run_gibbsflow_sis(prior, likelihood, nparticles, timegrid, lambda,
+  derivative_lambda, compute_gibbsflow)
 }
 \arguments{
 \item{prior}{list with keys: 
@@ -19,9 +19,13 @@ run_gibbsflow_sis(prior, likelihood, nparticles, lambda, timegrid,
 
 \item{nparticles}{number of particles}
 
+\item{timegrid}{vector describing numerical integration times}
+
 \item{lambda}{vector describing tempering schedule}
 
-\item{timegrid}{vector describing numerical integration times}
+\item{derivative_lambda}{time derivative of tempering schedule}
+
+\item{compute_gibbsflow}{function computing Gibbs flow}
 }
 \value{
 list with keys: 
